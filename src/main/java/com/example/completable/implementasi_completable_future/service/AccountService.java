@@ -1,15 +1,14 @@
 package com.example.completable.implementasi_completable_future.service;
 
-import com.example.completable.implementasi_completable_future.dto.Favorite;
-import com.example.completable.implementasi_completable_future.dto.Information;
-import com.example.completable.implementasi_completable_future.dto.Recent;
-import com.example.completable.implementasi_completable_future.dto.Saving;
+import com.example.completable.implementasi_completable_future.dto.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import javax.swing.text.Segment;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @Service
@@ -39,6 +38,25 @@ public class AccountService {
         return favorites;
     }
 
+//    misal disini kita ingin semua dimasukan ke Suggest
+    public List<Suggest> getFavoritesSuggest() {
+        log.info("get favoriteSuggest start");
+        RestClient restClient = RestClient.create();
+
+        List<Favorite> favorites = restClient.get()
+                .uri("http://localhost:3001/favorite")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List < Favorite >>(){
+                })
+                .getBody();
+
+        Objects.requireNonNull(favorites);
+        log.info("get favoriteSuggest end");
+        return favorites.stream()
+                .map(v -> new Suggest(v.codeBank(), v.accountNumber()))
+                .toList();
+    }
+
     public List<Recent> getRecent() {
 //        karena disini kita pakai mockoon, yg mana tools ini bisa buat api simulasi
 //        maka disini kita akan ambil pakai restClient
@@ -55,6 +73,24 @@ public class AccountService {
         return recents;
     }
 
+    public List<Suggest> getRecentSuggest() {
+        log.info("get RecentSuggest start");
+        RestClient restClient = RestClient.create();
+
+        List<Recent> recent = restClient.get()
+                .uri("http://localhost:3001/favorite")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List < Recent >>(){
+                })
+                .getBody();
+
+        Objects.requireNonNull(recent);
+        log.info("get RecentSuggest end");
+        return recent.stream()
+                .map(v -> new Suggest(v.codeBank(), v.accountNumber()))
+                .toList();
+    }
+
     public List<Saving> getSavings() {
 //        karena disini kita pakai mockoon, yg mana tools ini bisa buat api simulasi
 //        maka disini kita akan ambil pakai restClient
@@ -69,6 +105,24 @@ public class AccountService {
                 .getBody();
         log.info("get saving end");
         return savings;
+    }
+    public List<Suggest> getSavingsSuggest() {
+//        karena disini kita pakai mockoon, yg mana tools ini bisa buat api simulasi
+//        maka disini kita akan ambil pakai restClient
+        log.info("get saving start");
+        RestClient restClient = RestClient.create();
+
+        List<Saving> savings = restClient.get()
+                .uri("http://localhost:3001/saving")
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<List < Saving >>(){
+                })
+                .getBody();
+        Objects.requireNonNull(savings);
+        log.info("get saving end");
+        return savings.stream()
+                .map(v -> new Suggest("Me",v.accountNumber()))
+                .toList();
     }
 
 //    ParameterizedTypeReference ini wajib karena, ketika di compile java tidak mengetahu
